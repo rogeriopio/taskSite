@@ -1,14 +1,29 @@
 import express from 'express';
+import dotenv from 'dotenv';
+import { router as tasksRouter } from './routes/tasks.js';
+import connectDB from './db/connect.js';
 
+dotenv.config();
+const uri = process.env.MONGODB_URI;
 const app = express();
 const port = 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.get('/hello', (req, res) => {
     res.send('hello');
 });
 
-// app.get('/api/v1/tasks') --get all tasks
-// app.get('/api/v1/tasks/:id') --get single task
-// app.post('/api/v1/tasks') --create a new tasks
-// app.patch ('/api/v1/tasks/:id') --update a task
-// app.delete  ('/api/v1/tasks/:id') --delete a task
-app.listen(port, console.log(`Running on port ${port}`));
+app.use('/api/v1/tasks', tasksRouter);
+
+const start = async () => {
+    try {
+        await connectDB(uri);
+        app.listen(port, console.log(`Running on port ${port}`));
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+start();
